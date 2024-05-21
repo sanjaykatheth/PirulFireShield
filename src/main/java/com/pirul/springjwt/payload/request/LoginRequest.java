@@ -4,13 +4,25 @@ import jakarta.validation.constraints.NotBlank;
 
 public class LoginRequest {
 	@NotBlank
-  private String username;
+	private String username;
 
 	@NotBlank
 	private String password;
 
 	public String getUsername() {
 		return username;
+	}
+
+	private String initVector; // Add this field
+
+	// Add a constructor, getters and setters for all fields...
+
+	public String getInitVector() {
+		return this.initVector;
+	}
+
+	public void setInitVector(String initVector) {
+		this.initVector = initVector;
 	}
 
 	public void setUsername(String username) {
