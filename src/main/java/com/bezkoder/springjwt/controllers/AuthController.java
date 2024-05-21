@@ -92,31 +92,17 @@ public class AuthController {
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
 
-        Set<String> strRoles = signUpRequest.getRole();
+        String strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
-        if (strRoles == null) {
-            // If no roles are provided, default to ROLE_RANGER
+        if (strRoles != null && strRoles.contains("ROLE_ADMIN")) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Admin role is not allowed for signup!"));
+        } else {
             Role rangerRole = roleRepository.findByName(ERole.ROLE_RANGER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(rangerRole);
-        } else {
-        	strRoles.forEach(role -> {
-                switch (role) {
-                    case "ROLE_ADMIN":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-                        break;
-                    case "ROLE_RANGER":
-                        Role rangerRole = roleRepository.findByName(ERole.ROLE_RANGER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(rangerRole);
-                        break;
-                    default:
-                        throw new RuntimeException("Error: Role is not recognized.");
-                }
-            });
         }
 
         user.setRoles(roles);
