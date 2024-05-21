@@ -101,20 +101,19 @@ public class AuthController {
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(rangerRole);
         } else {
-            strRoles.forEach(role -> {
+        	strRoles.forEach(role -> {
                 switch (role) {
-                    case "admin":
+                    case "ROLE_ADMIN":
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);
                         break;
-                    case "ranger":
+                    case "ROLE_RANGER":
                         Role rangerRole = roleRepository.findByName(ERole.ROLE_RANGER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(rangerRole);
                         break;
                     default:
-                        // If the role doesn't match "admin" or "ranger", throw an exception or handle as needed
                         throw new RuntimeException("Error: Role is not recognized.");
                 }
             });
