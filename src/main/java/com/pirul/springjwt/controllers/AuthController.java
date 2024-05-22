@@ -17,6 +17,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -65,20 +66,20 @@ public class AuthController {
 	@Autowired
 	JwtUtils jwtUtils;
 
+	 @Value("${encryption.key}")
+	 private String encryptionKey;
+	 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest)
 			throws NoSuchPaddingException {
-
-		String key = "secret123"; // original key
 		String decryptedUsername = null;
 		String decryptedPassword = null;
 
 		try {
 			SecretKeySpec skeySpec = new SecretKeySpec(
-					MessageDigest.getInstance("SHA-256").digest(key.getBytes("UTF-8")), "AES");
-
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-			cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+                    MessageDigest.getInstance("SHA-256").digest(encryptionKey.getBytes("UTF-8")), "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec);
 			decryptedUsername = new String(cipher.doFinal(Base64.getDecoder().decode(loginRequest.getUsername())));
 			decryptedPassword = new String(cipher.doFinal(Base64.getDecoder().decode(loginRequest.getPassword())));
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException | IllegalBlockSizeException
