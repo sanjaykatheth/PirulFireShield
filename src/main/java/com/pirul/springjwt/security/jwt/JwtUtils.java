@@ -1,7 +1,6 @@
 package com.pirul.springjwt.security.jwt;
 
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 
 import org.slf4j.Logger;
