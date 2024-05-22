@@ -1,7 +1,6 @@
 package com.pirul.springjwt.controllers;
 
 import java.io.UnsupportedEncodingException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -15,7 +14,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +42,6 @@ import com.pirul.springjwt.repository.RoleRepository;
 import com.pirul.springjwt.repository.UserRepository;
 import com.pirul.springjwt.security.jwt.JwtUtils;
 import com.pirul.springjwt.security.services.UserDetailsImpl;
-import com.pirul.springjwt.utils.SHA256Hasher;
 
 import jakarta.validation.Valid;
 
@@ -55,9 +52,6 @@ public class AuthController {
 
 	@Autowired
 	AuthenticationManager authenticationManager;
-
-	@Autowired
-	private SHA256Hasher hash;
 
 	@Autowired
 	UserRepository userRepository;
@@ -80,17 +74,15 @@ public class AuthController {
 		String decryptedPassword = null;
 
 		try {
-			byte[] initVector = Base64.getDecoder().decode(loginRequest.getInitVector()); // Get the IV from the request
-			IvParameterSpec iv = new IvParameterSpec(initVector);
 			SecretKeySpec skeySpec = new SecretKeySpec(
 					MessageDigest.getInstance("SHA-256").digest(key.getBytes("UTF-8")), "AES");
 
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-			cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+			cipher.init(Cipher.DECRYPT_MODE, skeySpec);
 			decryptedUsername = new String(cipher.doFinal(Base64.getDecoder().decode(loginRequest.getUsername())));
 			decryptedPassword = new String(cipher.doFinal(Base64.getDecoder().decode(loginRequest.getPassword())));
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException | IllegalBlockSizeException
-				| InvalidKeyException | BadPaddingException | InvalidAlgorithmParameterException
+				| InvalidKeyException | BadPaddingException
 				| NoSuchPaddingException e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error decrypting credentials");
 		}

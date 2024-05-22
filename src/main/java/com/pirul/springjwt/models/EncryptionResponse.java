@@ -1,46 +1,34 @@
 package com.pirul.springjwt.models;
 
-
 public class EncryptionResponse {
-    private String initVector;
-	private String decryptedUsername;
-	private String decryptedPassword;
+	private String username;
+	private String password;
 
-	public String getDecryptedUsername() {
-		return decryptedUsername;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setDecryptedUsername(String decryptedUsername) {
-		this.decryptedUsername = decryptedUsername;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
-	public String getDecryptedPassword() {
-		return decryptedPassword;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setDecryptedPassword(String decryptedPassword) {
-		this.decryptedPassword = decryptedPassword;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
-
-	public EncryptionResponse(String initVector, String decryptedUsername, String decryptedPassword) {
+	public EncryptionResponse(String username, String password) {
 		super();
-		this.initVector = initVector;
-		this.decryptedUsername = decryptedUsername;
-		this.decryptedPassword = decryptedPassword;
+		this.username = username;
+		this.password = password;
 	}
 
 	public EncryptionResponse() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public String getInitVector() {
-		return initVector;
-	}
-
-	public void setInitVector(String initVector) {
-		this.initVector = initVector;
 	}
 
 }

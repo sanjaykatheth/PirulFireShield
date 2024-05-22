@@ -36,31 +36,30 @@ public class EncryptionController {
 
 	@PostMapping("/credentials")
 	public ResponseEntity<?> encryptCredentials(@RequestBody EncryptionRequest encryptionRequest) {
-		String encryptedUsername = null;
-		String encryptedPassword = null;
+	    String encryptedUsername = null;
+	    String encryptedPassword = null;
 
-		try {
-			byte[] initVector = new byte[16];
-			new SecureRandom().nextBytes(initVector); // Generate a random IV
-			IvParameterSpec iv = new IvParameterSpec(initVector);
-			SecretKeySpec skeySpec = new SecretKeySpec(
-					MessageDigest.getInstance("SHA-256").digest(key.getBytes("UTF-8")), "AES");
+	    try {
+	        SecretKeySpec skeySpec = new SecretKeySpec(
+	                MessageDigest.getInstance("SHA-256").digest(key.getBytes("UTF-8")), "AES");
 
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-			cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
-			encryptedUsername = Base64.getEncoder()
-					.encodeToString(cipher.doFinal(encryptionRequest.getUsername().getBytes()));
-			encryptedPassword = Base64.getEncoder()
-					.encodeToString(cipher.doFinal(encryptionRequest.getPassword().getBytes()));
+	        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+	        cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+	        encryptedUsername = Base64.getEncoder()
+	                .encodeToString(cipher.doFinal(encryptionRequest.getUsername().getBytes()));
+	        encryptedPassword = Base64.getEncoder()
+	                .encodeToString(cipher.doFinal(encryptionRequest.getPassword().getBytes()));
 
-			// Include the IV in the EncryptionResponse
-			EncryptionResponse encryptionResponse = new EncryptionResponse(
-					Base64.getEncoder().encodeToString(initVector), encryptedUsername, encryptedPassword);
+	        // No IV needed for ECB mode
 
-			return ResponseEntity.ok(encryptionResponse);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error encrypting credentials");
-		}
+	        // Include the encrypted credentials in the EncryptionResponse
+	        EncryptionResponse encryptionResponse = new EncryptionResponse(
+	                encryptedUsername, encryptedPassword);
+
+	        return ResponseEntity.ok(encryptionResponse);
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error encrypting credentials");
+	    }
 	}
 }
