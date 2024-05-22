@@ -48,7 +48,7 @@ import com.pirul.springjwt.utils.SHA256Hasher;
 
 import jakarta.validation.Valid;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
