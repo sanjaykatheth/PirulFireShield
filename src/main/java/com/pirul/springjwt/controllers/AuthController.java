@@ -18,6 +18,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -97,21 +99,27 @@ public class AuthController {
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
+	    JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles);
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setCacheControl(CacheControl.noCache().getHeaderValue()); // Disable caching
+	    headers.set("Authorization", "Bearer " + jwt); // Set JWT in Authorization header
 
-		return ResponseEntity.ok(
-				new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+	    // Check if token nearing expiration, refresh if needed and set in response header
+	    if (jwtUtils.isTokenNearExpiration(jwt)) {
+	        String refreshedToken = jwtUtils.generateJwtToken(authentication);
+	        headers.set("Authorization", "Bearer " + refreshedToken);
+	    }
+	    return ResponseEntity.ok().headers(headers).body(jwtResponse);
+
 	}
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-	    // Check if the requested role is allowed for signup
 	    if (!signUpRequest.getRole().equals(ERole.ROLE_RANGER.toString())) {
 	        return ResponseEntity.badRequest()
 	                .body(new MessageResponse(ErrorMessage.INVALID_SIGNUP_ROLE.getMessage()));
 	    }
-
-	    // Proceed with other checks only if the role is valid
-
+	    
 	    if (userRepository.existsByUsername(signUpRequest.getUsername())) {
 	        return ResponseEntity.badRequest()
 	                .body(new MessageResponse(ErrorMessage.USERNAME_ALREADY_TAKEN.getMessage()));
@@ -121,14 +129,11 @@ public class AuthController {
 	        return ResponseEntity.badRequest()
 	                .body(new MessageResponse(ErrorMessage.EMAIL_ALREADY_IN_USE.getMessage()));
 	    }
-
-	    // Create new user's account
 	    User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
 	            encoder.encode(signUpRequest.getPassword()));
 
 	    Set<Role> roles = new HashSet<>();
 
-	    // Add the ranger role to the user
 	    Role rangerRole = roleRepository.findByName(ERole.ROLE_RANGER)
 	            .orElseThrow(() -> new RuntimeException(ErrorMessage.ROLE_NOT_FOUND.getMessage()));
 	    roles.add(rangerRole);
