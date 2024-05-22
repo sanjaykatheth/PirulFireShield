@@ -28,7 +28,6 @@ import java.util.Base64;
 @RequestMapping("/encrypt")
 public class EncryptionController {
 
-
 	@Value("${encryption.key}")
 	private String key;
 

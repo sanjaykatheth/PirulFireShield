@@ -13,9 +13,7 @@ public class LoginRequest {
 		return username;
 	}
 
-	private String initVector; // Add this field
-
-	// Add a constructor, getters and setters for all fields...
+	private String initVector;
 
 	public String getInitVector() {
 		return this.initVector;
