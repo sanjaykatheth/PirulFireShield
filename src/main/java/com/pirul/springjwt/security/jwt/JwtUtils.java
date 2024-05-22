@@ -20,15 +20,15 @@ import jakarta.annotation.PostConstruct;
 public class JwtUtils {
 	private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-	@Value("${bezkoder.app.jwtSecret}")
+	@Value("${pirul.app.jwtSecret}")
 	private String jwtSecret;
 
-	@Value("${bezkoder.app.jwtExpirationMs}")
+	@Value("${pirul.app.jwtExpirationMs}")
 	private int jwtExpirationMs;
 
 	private Key key;
 
-    private static final long JWT_REFRESH_THRESHOLD = 300000; // Example: 5 minutes
+	private static final long JWT_REFRESH_THRESHOLD = 3300000; // Example: 55 minutes
 
 	@PostConstruct
 	public void init() {
