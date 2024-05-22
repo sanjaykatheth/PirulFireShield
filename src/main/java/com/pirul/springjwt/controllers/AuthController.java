@@ -111,36 +111,40 @@ public class AuthController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-			return ResponseEntity.badRequest()
-					.body(new MessageResponse(ErrorMessage.USERNAME_ALREADY_TAKEN.getMessage()));
-		}
+	    // Check if the requested role is allowed for signup
+	    if (!signUpRequest.getRole().equals(ERole.ROLE_RANGER.toString())) {
+	        return ResponseEntity.badRequest()
+	                .body(new MessageResponse(ErrorMessage.INVALID_SIGNUP_ROLE.getMessage()));
+	    }
 
-		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-			return ResponseEntity.badRequest()
-					.body(new MessageResponse(ErrorMessage.EMAIL_ALREADY_IN_USE.getMessage()));
-		}
+	    // Proceed with other checks only if the role is valid
 
-		// Create new user's account
-		User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
-				encoder.encode(signUpRequest.getPassword()));
+	    if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+	        return ResponseEntity.badRequest()
+	                .body(new MessageResponse(ErrorMessage.USERNAME_ALREADY_TAKEN.getMessage()));
+	    }
 
-		String strRoles = signUpRequest.getRole();
-		Set<Role> roles = new HashSet<>();
+	    if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+	        return ResponseEntity.badRequest()
+	                .body(new MessageResponse(ErrorMessage.EMAIL_ALREADY_IN_USE.getMessage()));
+	    }
 
-		if (strRoles != null && strRoles.contains("ROLE_ADMIN")) {
-			return ResponseEntity.badRequest()
-					.body(new MessageResponse(ErrorMessage.ADMIN_ROLE_NOT_ALLOWED.getMessage()));
-		} else {
-			Role rangerRole = roleRepository.findByName(ERole.ROLE_RANGER)
-					.orElseThrow(() -> new RuntimeException(ErrorMessage.ROLE_NOT_FOUND.getMessage()));
-			roles.add(rangerRole);
-		}
+	    // Create new user's account
+	    User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
+	            encoder.encode(signUpRequest.getPassword()));
 
-		user.setRoles(roles);
-		userRepository.save(user);
+	    Set<Role> roles = new HashSet<>();
 
-		return ResponseEntity.ok(new MessageResponse(ErrorMessage.USER_REGISTERED_SUCCESSFULLY.getMessage()));
+	    // Add the ranger role to the user
+	    Role rangerRole = roleRepository.findByName(ERole.ROLE_RANGER)
+	            .orElseThrow(() -> new RuntimeException(ErrorMessage.ROLE_NOT_FOUND.getMessage()));
+	    roles.add(rangerRole);
+
+	    user.setRoles(roles);
+	    userRepository.save(user);
+
+	    return ResponseEntity.ok(new MessageResponse(ErrorMessage.USER_REGISTERED_SUCCESSFULLY.getMessage()));
 	}
+
 
 }
