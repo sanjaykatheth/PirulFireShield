@@ -1,20 +1,24 @@
 package com.pirul.springjwt.constants;
 
-public enum ErrorMessage {
+public enum ResponseMessage  {
 
-	EMAIL_ALREADY_IN_USE("Email is already in use!"), USERNAME_ALREADY_TAKEN("Username is already taken!"),
-	ROLE_NOT_FOUND("Error: Role is not found."), 
-	ADMIN_ROLE_NOT_ALLOWED("Error: Admin role is not allowed for signup!"),
-	USER_REGISTERED_SUCCESSFULLY("User registered successfully!"),INVALID_SIGNUP_ROLE("invalid role can not signup");
+    EMAIL_ALREADY_IN_USE("Email is already in use!"),
+    USERNAME_ALREADY_TAKEN("Username is already taken!"),
+    ROLE_NOT_FOUND("Error: Role is not found."),
+    ADMIN_ROLE_NOT_ALLOWED("Error: Admin role is not allowed for signup!"),
+    USER_REGISTERED_SUCCESSFULLY("User registered successfully!"),
+    INVALID_SIGNUP_ROLE("Invalid role cannot signup"),
+    PIRUL_SUBMISSION_SUCCESS("Pirul submission data added successfully"),
+    PIRUL_RECORD_UPDATED_SUCCESSFULLY("Pirul record updated successfully"),
+    PIRUL_RECORD_DELETED_SUCCESSFULLY("Pirul record deleted successfully");
 
-	private final String message;
+    private final String message;
 
-	ErrorMessage(String message) {
-		this.message = message;
-	}
+    ResponseMessage (String message) {
+        this.message = message;
+    }
 
-	public String getMessage() {
-		return message;
-	}
-
+    public String getMessage() {
+        return message;
+    }
 }
