@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import com.pirul.springjwt.constants.ResponseMessage;
 import com.pirul.springjwt.models.PirulRecord;
 import com.pirul.springjwt.repository.PirulRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,13 +54,13 @@ public class PirulServiceImpl implements PirulService {
 			throw new RuntimeException("record not found with id: " + id);
 		}
 	}
-
+	
 	@Override
 	public void deletePirulRecord(Long id) {
-		if (pirulRepository.existsById(id)) {
-			pirulRepository.deleteById(id);
-		} else {
-			throw new RuntimeException("Record not found with id: " + id);
-		}
+	    if (pirulRepository.existsById(id)) {
+	        pirulRepository.deleteById(id);
+	    } else {
+	        throw new IllegalArgumentException(ResponseMessage.RECORD_DOES_NOT_EXIST.getMessage() + " " + id);
+	    }
 	}
 }
