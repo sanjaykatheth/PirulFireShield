@@ -10,8 +10,9 @@ public enum ResponseMessage  {
     INVALID_SIGNUP_ROLE("Invalid role cannot signup"),
     PIRUL_SUBMISSION_SUCCESS("Pirul submission data added successfully"),
     PIRUL_RECORD_UPDATED_SUCCESSFULLY("Pirul record updated successfully"),
-    PIRUL_RECORD_DELETED_SUCCESSFULLY("Pirul record deleted successfully");
-
+    PIRUL_RECORD_DELETED_SUCCESSFULLY("Pirul record deleted successfully"),
+    RECORD_DOES_NOT_EXIST("Recors does not exist");
+    
     private final String message;
 
     ResponseMessage (String message) {
