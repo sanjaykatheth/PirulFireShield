@@ -4,11 +4,18 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.pirul.springjwt.constants.ResponseMessage;
 import com.pirul.springjwt.models.PirulRecord;
+import com.pirul.springjwt.models.User;
 import com.pirul.springjwt.repository.PirulRepository;
+import com.pirul.springjwt.repository.UserRepository;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
@@ -17,14 +24,24 @@ public class PirulServiceImpl implements PirulService {
 	@Autowired
 	private PirulRepository pirulRepository;
 
+	@Autowired
+	UserRepository userRepository;
+	
 	@Override
 	public void submitPirulData(PirulRecord pirulRecord, HttpServletRequest request) {
-		String createdBy = request.getUserPrincipal().getName();
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		pirulRecord.setCreatedBy(createdBy);
+	    // Get the UserDetails object from authentication
+	    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+	    String userId = userDetails.getUsername();
+	    System.out.println("userId"+userId);
+	    // Fetch the User entity corresponding to the userId
+	    User user = userRepository.findByUsername(userId)
+	        .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + userId));
 
-		pirulRepository.save(pirulRecord);
-
+	    pirulRecord.setUser(user); // Set the user
+	    pirulRecord.setCreatedBy(userId);
+	    pirulRepository.save(pirulRecord);
 	}
 
 	@Override
