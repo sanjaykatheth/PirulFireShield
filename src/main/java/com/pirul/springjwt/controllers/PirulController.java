@@ -29,30 +29,30 @@ public class PirulController {
 	private PirulService pirulService;
 
 	@PostMapping("/submit")
-	public ResponseEntity<?> submitPirulRecored(@Valid @RequestBody PirulRecord pirulRecord,HttpServletRequest request) {
-		pirulService.submitPirulData(pirulRecord,request);
+	public ResponseEntity<?> submitPirulRecored(@Valid @RequestBody PirulRecord pirulRecord,
+			HttpServletRequest request) {
+		pirulService.submitPirulData(pirulRecord, request);
 		return ResponseEntity.ok("Pirul submission data added successfully");
 	}
-	
-	
-	 @GetMapping("/records")
-	    public ResponseEntity<Page<PirulRecord>> getAllPirulRecords( @RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
-	        Pageable pageable = PageRequest.of(page, size);
-	        Page<PirulRecord> records = pirulService.getAllPirulRecords(pageable);
-	        return ResponseEntity.ok(records);
-	    }
-	 
-	 @PutMapping("/update/{id}")
-	    public ResponseEntity<?> updatePirulRecord(@PathVariable Long id, @Valid @RequestBody PirulRecord pirulRecord) {
-	        pirulService.updatePirulRecord(id, pirulRecord);
-	        return ResponseEntity.ok("Pirul record updated successfully");
-	    }
 
-	    @DeleteMapping("/delete/{id}")
-	    public ResponseEntity<?> deletePirulRecord(@PathVariable Long id) {
-	        pirulService.deletePirulRecord(id);
-	        return ResponseEntity.ok("Pirul record deleted successfully");
-	    }
-	 
-	
+	@GetMapping
+	public ResponseEntity<Page<PirulRecord>> getAllPirulRecords(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		Page<PirulRecord> records = pirulService.getAllPirulRecords(pageable);
+		return ResponseEntity.ok(records);
+	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<?> updatePirulRecord(@PathVariable Long id, @Valid @RequestBody PirulRecord pirulRecord) {
+		pirulService.updatePirulRecord(id, pirulRecord);
+		return ResponseEntity.ok("Pirul record updated successfully");
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deletePirulRecord(@PathVariable Long id) {
+		pirulService.deletePirulRecord(id);
+		return ResponseEntity.ok("Pirul record deleted successfully");
+	}
+
 }
