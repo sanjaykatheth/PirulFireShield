@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pirul.springjwt.constants.ResponseMessage;
 import com.pirul.springjwt.models.PirulRecord;
+import com.pirul.springjwt.payload.response.MessageResponse;
 import com.pirul.springjwt.security.services.PirulService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +34,7 @@ public class PirulController {
 	public ResponseEntity<?> submitPirulRecored(@Valid @RequestBody PirulRecord pirulRecord,
 			HttpServletRequest request) {
 		pirulService.submitPirulData(pirulRecord, request);
-		return ResponseEntity.ok("Pirul submission data added successfully");
+		return ResponseEntity.ok(new MessageResponse(ResponseMessage.PIRUL_SUBMISSION_SUCCESS.getMessage()));
 	}
 
 	@GetMapping
@@ -46,13 +48,13 @@ public class PirulController {
 	@PutMapping("/{id}")
 	public ResponseEntity<?> updatePirulRecord(@PathVariable Long id, @Valid @RequestBody PirulRecord pirulRecord) {
 		pirulService.updatePirulRecord(id, pirulRecord);
-		return ResponseEntity.ok("Pirul record updated successfully");
+		return ResponseEntity.ok(ResponseMessage.PIRUL_RECORD_UPDATED_SUCCESSFULLY.getMessage());
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deletePirulRecord(@PathVariable Long id) {
 		pirulService.deletePirulRecord(id);
-		return ResponseEntity.ok("Pirul record deleted successfully");
+		return ResponseEntity.ok(ResponseMessage.PIRUL_RECORD_DELETED_SUCCESSFULLY.getMessage());
 	}
 
 }
