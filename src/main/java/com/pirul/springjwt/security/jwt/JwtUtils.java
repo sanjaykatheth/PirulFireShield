@@ -17,10 +17,8 @@ import jakarta.annotation.PostConstruct;
 
 @Component
 public class JwtUtils {
+	
 	private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
-
-	@Value("${pirul.app.jwtSecret}")
-	private String jwtSecret;
 
 	@Value("${pirul.app.jwtExpirationMs}")
 	private int jwtExpirationMs;
