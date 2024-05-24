@@ -24,7 +24,7 @@ import com.pirul.springjwt.security.services.PirulService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-@CrossOrigin
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/pirul")
 public class PirulController {

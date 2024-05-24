@@ -1,5 +1,7 @@
 package com.pirul.springjwt.security;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +18,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.pirul.springjwt.security.jwt.AuthEntryPointJwt;
 import com.pirul.springjwt.security.jwt.AuthTokenFilter;
@@ -95,7 +100,23 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     http.authenticationProvider(authenticationProvider());
 
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-    
+    // Configure CORS
+    http.cors().configurationSource(corsConfigurationSource());
+
     return http.build();
+  }
+  
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+      CorsConfiguration configuration = new CorsConfiguration();
+      configuration.setAllowedOriginPatterns(Arrays.asList("https://logbookgps.com", "https://www.logbookgps.com", "http://localhost:3000", "*")); // Add your allowed origins or patterns here
+      configuration.addAllowedMethod("*");
+      configuration.addAllowedHeader("*");
+      configuration.setAllowCredentials(true);
+
+      UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+      source.registerCorsConfiguration("/**", configuration);
+
+      return source;
   }
 }
