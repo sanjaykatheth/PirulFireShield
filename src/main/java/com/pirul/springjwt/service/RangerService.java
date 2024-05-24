@@ -8,7 +8,7 @@ import com.pirul.springjwt.models.PirulRecordDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-public interface PirulService {
+public interface RangerService {
 
 	void submitPirulData(PirulRecord pirulRecord, HttpServletRequest request);
 

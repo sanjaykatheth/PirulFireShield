@@ -28,9 +28,9 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 
 @Service
-public class PirulServiceImpl implements PirulService {
+public class RangerServiceImpl implements RangerService {
 
-    private static final Logger logger = LoggerFactory.getLogger(PirulServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(RangerServiceImpl.class);
 
 	@Autowired
 	private PirulRepository pirulRepository;

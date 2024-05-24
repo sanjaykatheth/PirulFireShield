@@ -21,7 +21,7 @@ import com.pirul.springjwt.constants.ResponseMessage;
 import com.pirul.springjwt.models.PirulRecord;
 import com.pirul.springjwt.models.PirulRecordDTO;
 import com.pirul.springjwt.payload.response.MessageResponse;
-import com.pirul.springjwt.service.PirulService;
+import com.pirul.springjwt.service.RangerService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -29,15 +29,15 @@ import jakarta.validation.Valid;
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/api/pirul")
-public class PirulController {
+public class RangerController {
 
 	@Autowired
-	private PirulService pirulService;
+	private RangerService rangerService;
 
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitPirulRecored(@Valid @RequestBody PirulRecord pirulRecord,
 			HttpServletRequest request) {
-		pirulService.submitPirulData(pirulRecord, request);
+		rangerService.submitPirulData(pirulRecord, request);
 		return ResponseEntity.ok(new MessageResponse(ResponseMessage.PIRUL_SUBMISSION_SUCCESS.getMessage()));
 	}
 
@@ -45,19 +45,19 @@ public class PirulController {
 	public ResponseEntity<Page<PirulRecord>> getAllPirulRecords(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
 		Pageable pageable = PageRequest.of(page, size);
-		Page<PirulRecord> records = pirulService.getAllPirulRecords(pageable);
+		Page<PirulRecord> records = rangerService.getAllPirulRecords(pageable);
 		return ResponseEntity.ok(records);
 	}
 
 	@PatchMapping("/{id}")
 	public ResponseEntity<?> updatePirulRecord(@PathVariable Long id, @Valid @RequestBody PirulRecordDTO pirulRecord) {
-		pirulService.updatePirulRecord(id, pirulRecord);
+		rangerService.updatePirulRecord(id, pirulRecord);
 		return ResponseEntity.ok(new MessageResponse(ResponseMessage.PIRUL_RECORD_UPDATED_SUCCESSFULLY.getMessage()));
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deletePirulRecord(@PathVariable Long id) {
-		pirulService.deletePirulRecord(id);
+		rangerService.deletePirulRecord(id);
 		return ResponseEntity.ok(new MessageResponse(ResponseMessage.PIRUL_RECORD_DELETED_SUCCESSFULLY.getMessage()));
 	}
 
