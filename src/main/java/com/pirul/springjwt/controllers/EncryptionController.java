@@ -40,12 +40,7 @@ public class EncryptionController {
 					.encodeToString(cipher.doFinal(encryptionRequest.getUsername().getBytes()));
 			encryptedPassword = Base64.getEncoder()
 					.encodeToString(cipher.doFinal(encryptionRequest.getPassword().getBytes()));
-
-			// No IV needed for ECB mode
-
-			// Include the encrypted credentials in the EncryptionResponse
 			EncryptionResponse encryptionResponse = new EncryptionResponse(encryptedUsername, encryptedPassword);
-
 			return ResponseEntity.ok(encryptionResponse);
 		} catch (Exception ex) {
 			ex.printStackTrace();

@@ -1,4 +1,4 @@
-package com.pirul.springjwt.security.services;
+package com.pirul.springjwt.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

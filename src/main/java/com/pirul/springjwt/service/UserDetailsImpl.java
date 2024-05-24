@@ -1,4 +1,4 @@
-package com.pirul.springjwt.security.services;
+package com.pirul.springjwt.service;
 
 import java.util.Collection;
 import java.util.List;

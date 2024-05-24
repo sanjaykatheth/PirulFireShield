@@ -1,6 +1,7 @@
 package com.pirul.springjwt.security.jwt;
 
 import java.io.IOException;
+import java.util.Date;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,7 +18,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.pirul.springjwt.security.services.UserDetailsServiceImpl;
+import com.pirul.springjwt.service.UserDetailsServiceImpl;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
   @Autowired
@@ -30,33 +31,32 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
-    try {
-      String jwt = parseJwt(request);
-      if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-        String username = jwtUtils.getUserNameFromJwtToken(jwt);
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities());
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        if (jwtUtils.isTokenNearExpiration(jwt)) {
-            String refreshedToken = jwtUtils.generateJwtToken(authentication);
-            response.setHeader("Authorization", "Bearer " + refreshedToken);
-        }
+          throws ServletException, IOException {
+      try {
+          String jwt = parseJwt(request);
+          if (jwt != null) {
+              String username = jwtUtils.extractUsername(jwt);
+              UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+              if (jwtUtils.isTokenValid(jwt, userDetails)) {
+                  UsernamePasswordAuthenticationToken authentication =
+                          new UsernamePasswordAuthenticationToken(
+                                  userDetails,
+                                  null,
+                                  userDetails.getAuthorities());
+                  authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                  SecurityContextHolder.getContext().setAuthentication(authentication);
+                  if (jwtUtils.extractExpiration(jwt).before(new Date())) {
+                      String refreshedToken = jwtUtils.generateToken(userDetails);
+                      response.setHeader("Authorization", "Bearer " + refreshedToken);
+                  }
+              }
+          }
+      } catch (Exception e) {
+          logger.error("Cannot set user authentication: {}", e);
       }
-    } catch (Exception e) {
-      logger.error("Cannot set user authentication: {}", e);
-    }
 
-    filterChain.doFilter(request, response);
+      filterChain.doFilter(request, response);
   }
-
   private String parseJwt(HttpServletRequest request) {
     String headerAuth = request.getHeader("Authorization");
 

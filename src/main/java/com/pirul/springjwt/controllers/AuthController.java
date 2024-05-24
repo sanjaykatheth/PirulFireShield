@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.crypto.NoSuchPaddingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
@@ -34,7 +36,7 @@ import com.pirul.springjwt.payload.response.MessageResponse;
 import com.pirul.springjwt.repository.RoleRepository;
 import com.pirul.springjwt.repository.UserRepository;
 import com.pirul.springjwt.security.jwt.JwtUtils;
-import com.pirul.springjwt.security.services.UserDetailsImpl;
+import com.pirul.springjwt.service.UserDetailsImpl;
 
 import jakarta.validation.Valid;
 
@@ -42,6 +44,8 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+	
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -64,8 +68,10 @@ public class AuthController {
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest)
 			throws NoSuchPaddingException {
-		String decryptedUsername = null;
-		String decryptedPassword = null;
+        logger.info("Received sign-in request for user: {}", loginRequest.getUsername());
+
+		//String decryptedUsername = null;
+		//String decryptedPassword = null;
 
 //		try {
 //			SecretKeySpec skeySpec = new SecretKeySpec(
@@ -84,9 +90,9 @@ public class AuthController {
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		String jwt = jwtUtils.generateJwtToken(authentication);
-
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+		String jwt = jwtUtils.generateToken(userDetails);
+
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 		JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(),
@@ -95,29 +101,33 @@ public class AuthController {
 		headers.setCacheControl(CacheControl.noCache().getHeaderValue()); // Disable caching
 		headers.set("Authorization", "Bearer " + jwt); // Set JWT in Authorization header
 
-		// Check if token nearing expiration, refresh if needed and set in response
-		// header
+		
 		if (jwtUtils.isTokenNearExpiration(jwt)) {
-			String refreshedToken = jwtUtils.generateJwtToken(authentication);
-			headers.set("Authorization", "Bearer " + refreshedToken);
+		    String refreshedToken = jwtUtils.generateToken(userDetails);
+		    headers.set("Authorization", "Bearer " + refreshedToken);
 		}
+        logger.info("User: {} authenticated successfully", loginRequest.getUsername());
 		return ResponseEntity.ok().headers(headers).body(jwtResponse);
 
 	}
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        logger.info("Received sign-up request for new user: {}", signUpRequest.getUsername());
 		if (!signUpRequest.getRole().equals(ERole.ROLE_RANGER.toString())) {
+            logger.warn("Invalid sign-up role specified: {}", signUpRequest.getRole());
 			return ResponseEntity.badRequest()
 					.body(new MessageResponse(ResponseMessage.INVALID_SIGNUP_ROLE.getMessage()));
 		}
 
 		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            logger.warn("Invalid sign-up role specified: {}", signUpRequest.getRole());
 			return ResponseEntity.badRequest()
 					.body(new MessageResponse(ResponseMessage.USERNAME_ALREADY_TAKEN.getMessage()));
 		}
 
 		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            logger.warn("Email {} is already in use", signUpRequest.getEmail());
 			return ResponseEntity.badRequest()
 					.body(new MessageResponse(ResponseMessage.EMAIL_ALREADY_IN_USE.getMessage()));
 		}
@@ -132,7 +142,7 @@ public class AuthController {
 
 		user.setRoles(roles);
 		userRepository.save(user);
-
+        logger.info("New user registered successfully: {}", signUpRequest.getUsername());
 		return ResponseEntity.ok(new MessageResponse(ResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage()));
 	}
 

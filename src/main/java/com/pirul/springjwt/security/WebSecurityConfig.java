@@ -24,7 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.pirul.springjwt.security.jwt.AuthEntryPointJwt;
 import com.pirul.springjwt.security.jwt.AuthTokenFilter;
-import com.pirul.springjwt.security.services.UserDetailsServiceImpl;
+import com.pirul.springjwt.service.UserDetailsServiceImpl;
 
 @Configuration
 @EnableMethodSecurity
