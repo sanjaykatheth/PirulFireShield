@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,8 +42,8 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-	
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
+	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -86,48 +84,42 @@ public class AuthController {
 //			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error decrypting credentials");
 //		}
 
-		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-		String jwt = jwtUtils.generateToken(userDetails);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();    
+            List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
 
-		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-				.collect(Collectors.toList());
-		JwtResponse jwtResponse = new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(),
-				userDetails.getEmail(), roles);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setCacheControl(CacheControl.noCache().getHeaderValue()); // Disable caching
-		headers.set("Authorization", "Bearer " + jwt); // Set JWT in Authorization header
+            return ResponseEntity.ok(new JwtResponse(jwt, 
+                                 userDetails.getId(), 
+                                 userDetails.getUsername(), 
+                                 userDetails.getEmail(), 
+                                 roles));
+          }
 
-		
-		if (jwtUtils.isTokenNearExpiration(jwt)) {
-		    String refreshedToken = jwtUtils.generateToken(userDetails);
-		    headers.set("Authorization", "Bearer " + refreshedToken);
-		}
-        logger.info("User: {} authenticated successfully", loginRequest.getUsername());
-		return ResponseEntity.ok().headers(headers).body(jwtResponse);
-
-	}
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        logger.info("Received sign-up request for new user: {}", signUpRequest.getUsername());
+		logger.info("Received sign-up request for new user: {}", signUpRequest.getUsername());
 		if (!signUpRequest.getRole().equals(ERole.ROLE_RANGER.toString())) {
-            logger.warn("Invalid sign-up role specified: {}", signUpRequest.getRole());
+			logger.warn("Invalid sign-up role specified: {}", signUpRequest.getRole());
 			return ResponseEntity.badRequest()
 					.body(new MessageResponse(ResponseMessage.INVALID_SIGNUP_ROLE.getMessage()));
 		}
 
 		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            logger.warn("Invalid sign-up role specified: {}", signUpRequest.getRole());
+			logger.warn("Invalid sign-up role specified: {}", signUpRequest.getRole());
 			return ResponseEntity.badRequest()
 					.body(new MessageResponse(ResponseMessage.USERNAME_ALREADY_TAKEN.getMessage()));
 		}
 
 		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            logger.warn("Email {} is already in use", signUpRequest.getEmail());
+			logger.warn("Email {} is already in use", signUpRequest.getEmail());
 			return ResponseEntity.badRequest()
 					.body(new MessageResponse(ResponseMessage.EMAIL_ALREADY_IN_USE.getMessage()));
 		}
@@ -142,7 +134,7 @@ public class AuthController {
 
 		user.setRoles(roles);
 		userRepository.save(user);
-        logger.info("New user registered successfully: {}", signUpRequest.getUsername());
+		logger.info("New user registered successfully: {}", signUpRequest.getUsername());
 		return ResponseEntity.ok(new MessageResponse(ResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage()));
 	}
 

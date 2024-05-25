@@ -11,7 +11,10 @@ public enum ResponseMessage  {
     PIRUL_SUBMISSION_SUCCESS("Pirul submission data added successfully"),
     PIRUL_RECORD_UPDATED_SUCCESSFULLY("Pirul record updated successfully"),
     PIRUL_RECORD_DELETED_SUCCESSFULLY("Pirul record deleted successfully"),
-    RECORD_DOES_NOT_EXIST("Recors does not exist");
+    RECORD_DOES_NOT_EXIST("Recors does not exist"),
+    RANGER_DELETED_SUCCESSFULLY("Ranger deleted successfully"),
+    RANGER_UPDATED_SUCCESSFULLY("Ranger updated successfully");
+;
     
     private final String message;
 
