@@ -1,11 +1,10 @@
 package com.pirul.springjwt.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.pirul.springjwt.models.User;
 
 public interface AdminService {
-	
-	List<User> getUsersWithRangerRole();
-
+    Page<User> getUsersWithRangerRole(Pageable pageable);
 }
