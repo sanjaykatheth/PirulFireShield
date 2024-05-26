@@ -3,11 +3,13 @@ package com.pirul.springjwt.exception;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 
 import com.pirul.springjwt.constants.ErrorResponse;
 
@@ -31,5 +33,10 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.badRequest().body(errorResponse);
 	}
 
-	
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex,
+			WebRequest request) {
+		ErrorResponse errorResponse = new ErrorResponse(ex.getMessage());
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	}
 }

@@ -68,26 +68,37 @@ public class AdminServiceImpl implements AdminService {
 	@Override
 	@Transactional
 	public void updateRanger(Long id, RangerUpdateRequest rangerUpdateRequest) {
-		logger.info("Updating Ranger with ID: {}", id);
+	    logger.info("Updating Ranger with ID: {}", id);
 
-		// Find the user by id
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("User not found with id " + id));
+	    // Find the user by id
+	    User user = userRepository.findById(id)
+	            .orElseThrow(() -> new IllegalArgumentException("User not found with id " + id));
 
-		// Log the fields being updated directly
-		if (rangerUpdateRequest.getUsername() != null) {
-			user.setUsername(rangerUpdateRequest.getUsername());
-		}
-		if (rangerUpdateRequest.getEmail() != null) {
-			user.setEmail(rangerUpdateRequest.getEmail());
-		}
-		if (rangerUpdateRequest.getPassword() != null) {
-			String maskedPassword = "*** (masked)"; 
-			user.setPassword(passwordEncoder.encode(rangerUpdateRequest.getPassword()));
-			logger.info("Updated password for Ranger with ID {}: {}", id, maskedPassword);
-		}
-		userRepository.save(user);
-		logger.info("Ranger with ID {} updated successfully", id);
+	    // Check if the user has the role 'ROLE_ADMIN'
+	    if (user.getRoles().stream().anyMatch(role -> role.getName() == ERole.ROLE_ADMIN)) {
+	        throw new IllegalArgumentException("Role of admin user cannot be updated");
+	    }
+
+	    // Validate if the new username already exists
+	    if (rangerUpdateRequest.getUsername() != null && !user.getUsername().equals(rangerUpdateRequest.getUsername())) {
+	        Optional<User> existingUser = userRepository.findByUsername(rangerUpdateRequest.getUsername());
+	        if (existingUser.isPresent()) {
+	            throw new IllegalArgumentException("Username already exists");
+	        }
+	    }
+
+	    if (rangerUpdateRequest.getUsername() != null) {
+	        user.setUsername(rangerUpdateRequest.getUsername());
+	    }
+	    if (rangerUpdateRequest.getEmail() != null) {
+	        user.setEmail(rangerUpdateRequest.getEmail());
+	    }
+	    if (rangerUpdateRequest.getPassword() != null) {
+	        String maskedPassword = "*** (masked)";
+	        user.setPassword(passwordEncoder.encode(rangerUpdateRequest.getPassword()));
+	        logger.info("Updated password for Ranger with ID {}: {}", id, maskedPassword);
+	    }
+	    userRepository.save(user);
+	    logger.info("Ranger with ID {} updated successfully", id);
 	}
-
 }

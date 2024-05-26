@@ -2,6 +2,7 @@ package com.pirul.springjwt.security.jwt;
 
 
 import java.io.IOException;
+import java.util.Date;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -47,6 +48,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (jwtUtils.extractExpiration(jwt).before(new Date())) {
+        	String refreshedToken = jwtUtils.generateJwtToken(authentication);
+            response.setHeader("Authorization", "Bearer " + refreshedToken);
+        }
       }
     } catch (Exception e) {
       logger.error("Cannot set user authentication: {}", e);

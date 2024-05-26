@@ -13,4 +13,5 @@ public interface AdminService {
 	ResponseEntity<?> deleteRanger(Long id);
 
 	void updateRanger(Long id, RangerUpdateRequest rangerUpdateRequest);
+
 }

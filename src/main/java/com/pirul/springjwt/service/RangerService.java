@@ -18,4 +18,8 @@ public interface RangerService {
 
 	void deletePirulRecord(Long id);
 
+	String approvePirulRecord(Long id);
+
+	Page<PirulRecord> getApprovedPirulRecords(Pageable pageable);
+
 }

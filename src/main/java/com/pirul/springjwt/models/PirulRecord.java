@@ -49,11 +49,15 @@ public class PirulRecord {
 	private double totalAmount;
 	
     private String createdBy;
+    
+    private boolean approved;
+    
 
 	public Long getId() {
 		return id;
 	}
 
+	
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -152,6 +156,16 @@ public class PirulRecord {
 
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
+	}
+
+
+	public boolean isApproved() {
+		return approved;
+	}
+
+
+	public void setApproved(boolean approved) {
+		this.approved = approved;
 	}
     
 

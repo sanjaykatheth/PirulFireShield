@@ -1,5 +1,6 @@
 package com.pirul.springjwt.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,8 +15,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pirul.springjwt.constants.ResponseMessage;
+import com.pirul.springjwt.exception.ResourceNotFoundException;
 import com.pirul.springjwt.models.PirulRecord;
 import com.pirul.springjwt.models.PirulRecordDTO;
 import com.pirul.springjwt.models.User;
@@ -30,7 +33,7 @@ import jakarta.validation.Validator;
 @Service
 public class RangerServiceImpl implements RangerService {
 
-    private static final Logger logger = LoggerFactory.getLogger(RangerServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(RangerServiceImpl.class);
 
 	@Autowired
 	private PirulRepository pirulRepository;
@@ -43,7 +46,6 @@ public class RangerServiceImpl implements RangerService {
 
 	@Autowired
 	private ModelMapper modelMapper;
-	
 
 	@Override
 	public void submitPirulData(PirulRecord pirulRecord, HttpServletRequest request) {
@@ -62,14 +64,15 @@ public class RangerServiceImpl implements RangerService {
 
 	@Override
 	public Page<PirulRecord> getAllPirulRecords(Pageable pageable) {
-        logger.info("Fetching all Pirul Records");
+		logger.info("Fetching all Pirul Records");
 		return pirulRepository.findAll(pageable);
 
 	}
 
 	@Override
+	@Transactional
 	public void updatePirulRecord(Long id, PirulRecordDTO pirulRecordDTO) {
-        logger.info("Updating Pirul Record with ID: {}", id);
+		logger.info("Updating Pirul Record with ID: {}", id);
 		Optional<PirulRecord> checkRecord = pirulRepository.findById(id);
 		if (checkRecord.isPresent()) {
 			PirulRecord existingRecord = checkRecord.get();
@@ -87,21 +90,55 @@ public class RangerServiceImpl implements RangerService {
 			}
 
 			pirulRepository.save(existingRecord);
-            logger.info("Pirul Record with ID {} updated successfully", id);
+			logger.info("Pirul Record with ID {} updated successfully", id);
 		} else {
 			throw new IllegalArgumentException(ResponseMessage.RECORD_DOES_NOT_EXIST.getMessage());
 		}
 	}
 
 	@Override
+	@Transactional
 	public void deletePirulRecord(Long id) {
-        logger.info("Deleting Pirul Record with ID: {}", id);
+		logger.info("Deleting Pirul Record with ID: {}", id);
 		if (pirulRepository.existsById(id)) {
 			pirulRepository.deleteById(id);
-            logger.info("Pirul Record with ID {} deleted successfully", id);
+			logger.info("Pirul Record with ID {} deleted successfully", id);
 
 		} else {
 			throw new IllegalArgumentException(ResponseMessage.RECORD_DOES_NOT_EXIST.getMessage() + " " + id);
 		}
 	}
+
+	@Override
+	@Transactional
+	public String approvePirulRecord(Long recordId) {
+		logger.info("Approving Pirul Record with ID: {}", recordId);
+		Optional<PirulRecord> optionalPirulRecord = pirulRepository.findById(recordId);
+		if (optionalPirulRecord.isPresent()) {
+			PirulRecord pirulRecord = optionalPirulRecord.get();
+			if (pirulRecord.isApproved()) {
+				String message = "Pirul Record with ID " + recordId + " is already approved by User ID "
+						+ pirulRecord.getUser().getId();
+				logger.warn(message);
+				return message;
+			} else {
+				pirulRecord.setApproved(true);
+				pirulRepository.save(pirulRecord);
+				Long userId = pirulRecord.getUser().getId(); // Assuming getUser() returns the User entity and getId()
+																// returns the User ID
+				String message = "Pirul Record with ID " + recordId + " approved successfully by User ID " + userId;
+				logger.info(message);
+				return message;
+			}
+		} else {
+			logger.error("Pirul Record with ID {} not found", recordId);
+			throw new ResourceNotFoundException("PirulRecord not found with id " + recordId);
+		}
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	 public Page<PirulRecord> getApprovedPirulRecords(Pageable pageable) {
+        return pirulRepository.findByApprovedTrue(pageable);
+    }
 }

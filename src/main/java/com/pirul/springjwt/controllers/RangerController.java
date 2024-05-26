@@ -60,5 +60,7 @@ public class RangerController {
 		rangerService.deletePirulRecord(id);
 		return ResponseEntity.ok(new MessageResponse(ResponseMessage.PIRUL_RECORD_DELETED_SUCCESSFULLY.getMessage()));
 	}
+	
+
 
 }
