@@ -12,4 +12,7 @@ public interface PirulRepository extends JpaRepository<PirulRecord, Long> {
 
     Page<PirulRecord> findByApprovedTrue(Pageable pageable);
 
+     Page<PirulRecord> findByCreatedBy(String createdBy, Pageable pageable);
+    
+
 }

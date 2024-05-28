@@ -3,6 +3,7 @@ package com.pirul.springjwt.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.pirul.springjwt.constants.ResponseMessage;
 import com.pirul.springjwt.exception.ResourceNotFoundException;
+import com.pirul.springjwt.models.ERole;
 import com.pirul.springjwt.models.PirulRecord;
 import com.pirul.springjwt.models.PirulRecordDTO;
 import com.pirul.springjwt.models.User;
@@ -65,9 +69,26 @@ public class RangerServiceImpl implements RangerService {
 	@Override
 	public Page<PirulRecord> getAllPirulRecords(Pageable pageable) {
 		logger.info("Fetching all Pirul Records");
-		return pirulRepository.findAll(pageable);
+		  Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+		    String username = userDetails.getUsername();
+		    List<String> roles = userDetails.getAuthorities().stream()
+		            .map(item -> item.getAuthority())
+		            .collect(Collectors.toList());
 
-	}
+		    Page<PirulRecord> records;
+		    if (roles.contains(ERole.ROLE_ADMIN.toString())) {
+	            records = pirulRepository.findAll(pageable);
+		    } else if (roles.contains(ERole.ROLE_RANGER.toString())) {
+	            records = pirulRepository.findByCreatedBy(username, pageable);
+		    } else {
+	            throw new ResourceNotFoundException("You do not have permission to access this resource");
+	        }
+
+	        return records;
+		}
+
+	
 
 	@Override
 	@Transactional
