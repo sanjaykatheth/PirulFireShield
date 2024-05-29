@@ -20,12 +20,19 @@ public class PirulRecordDTO {
     @Pattern(regexp="[0-9]{9,18}", message="Bank account number must be between 9 and 18 digits")
     private String bankAccountNumber;
 
-    private String bankName;
-    private String ifscCode;
-    private double weightOfPirul;
-    private double ratePerKg;
-    private double totalAmount;
+	private String bankName;
+	
+	private String ifscCode;
+	
+	private double weightOfPirul;
+	
+	private double ratePerKg;
+	
+	private double totalAmount;
+	
     private String createdBy;
+    
+    private boolean approved;
 
     // Getters and setters
 
@@ -116,4 +123,13 @@ public class PirulRecordDTO {
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+
+	public boolean isApproved() {
+		return approved;
+	}
+
+	public void setApproved(boolean approved) {
+		this.approved = approved;
+	}
+    
 }
