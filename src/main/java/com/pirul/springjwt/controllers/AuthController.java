@@ -68,21 +68,22 @@ public class AuthController {
 			throws NoSuchPaddingException {
         logger.info("Received sign-in request for user: {}", loginRequest.getUsername());
 
-		//String decryptedUsername = null;
-		//String decryptedPassword = null;
-
-//		try {
-//			SecretKeySpec skeySpec = new SecretKeySpec(
-//                    MessageDigest.getInstance("SHA-256").digest(encryptionKey.getBytes("UTF-8")), "AES");
-//            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-//            cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-//			decryptedUsername = new String(cipher.doFinal(Base64.getDecoder().decode(loginRequest.getUsername())));
-//			decryptedPassword = new String(cipher.doFinal(Base64.getDecoder().decode(loginRequest.getPassword())));
-//		} catch (NoSuchAlgorithmException | UnsupportedEncodingException | IllegalBlockSizeException
-//				| InvalidKeyException | BadPaddingException
-//				| NoSuchPaddingException e) {
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error decrypting credentials");
-//		}
+		/*
+		 * String decryptedUsername = null; String decryptedPassword = null;
+		 * 
+		 * try { SecretKeySpec skeySpec = new SecretKeySpec(
+		 * MessageDigest.getInstance("SHA-256").digest(encryptionKey.getBytes("UTF-8")),
+		 * "AES"); Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+		 * cipher.init(Cipher.DECRYPT_MODE, skeySpec); decryptedUsername = new
+		 * String(cipher.doFinal(Base64.getDecoder().decode(loginRequest.getUsername()))
+		 * ); decryptedPassword = new
+		 * String(cipher.doFinal(Base64.getDecoder().decode(loginRequest.getPassword()))
+		 * ); } catch (NoSuchAlgorithmException | UnsupportedEncodingException |
+		 * IllegalBlockSizeException | InvalidKeyException | BadPaddingException |
+		 * NoSuchPaddingException e) { return
+		 * ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
+		 * body("Error decrypting credentials"); }
+		 */
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
