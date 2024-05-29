@@ -5,14 +5,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,9 +45,6 @@ public class RangerServiceImpl implements RangerService {
 	@Autowired
 	private Validator validator;
 
-	@Autowired
-	private ModelMapper modelMapper;
-
 	@Override
 	public void submitPirulData(PirulRecord pirulRecord, HttpServletRequest request) {
 
@@ -62,7 +56,7 @@ public class RangerServiceImpl implements RangerService {
 
 		pirulRecord.setUser(user);
 		pirulRecord.setCreatedBy(userId);
-	    pirulRecord.setUpdatedBy(userId); // Initialize updatedBy for the first time
+		pirulRecord.setUpdatedBy(userId);
 		pirulRepository.save(pirulRecord);
 		logger.info("Pirul Record submitted successfully by user: {}", userId);
 	}
@@ -70,83 +64,81 @@ public class RangerServiceImpl implements RangerService {
 	@Override
 	public Page<PirulRecord> getAllPirulRecords(Pageable pageable) {
 		logger.info("Fetching all Pirul Records");
-		  Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-		    String username = userDetails.getUsername();
-		    List<String> roles = userDetails.getAuthorities().stream()
-		            .map(item -> item.getAuthority())
-		            .collect(Collectors.toList());
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+		String username = userDetails.getUsername();
+		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+				.collect(Collectors.toList());
 
-		    Page<PirulRecord> records;
-		    if (roles.contains(ERole.ROLE_ADMIN.toString())) {
-	            records = pirulRepository.findAll(pageable);
-		    } else if (roles.contains(ERole.ROLE_RANGER.toString())) {
-	            records = pirulRepository.findByCreatedBy(username, pageable);
-		    } else {
-	            throw new ResourceNotFoundException("You do not have permission to access this resource");
-	        }
-
-	        return records;
+		Page<PirulRecord> records;
+		if (roles.contains(ERole.ROLE_ADMIN.toString())) {
+			records = pirulRepository.findAll(pageable);
+		} else if (roles.contains(ERole.ROLE_RANGER.toString())) {
+			records = pirulRepository.findByCreatedBy(username, pageable);
+		} else {
+			throw new ResourceNotFoundException("You do not have permission to access this resource");
 		}
 
-	
+		return records;
+	}
+
 	@Override
 	public void updatePirulRecord(Long id, PirulRecordDTO pirulRecordDTO) {
-	    logger.info("Updating Pirul Record with ID: {}", id);
-	    Optional<PirulRecord> checkRecord = pirulRepository.findById(id);
-	    if (checkRecord.isPresent()) {
-	        PirulRecord existingRecord = checkRecord.get();
-	    
-	        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-	        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-	        String userId = userDetails.getUsername();
-	        
-	        if (pirulRecordDTO.getName() != null) {
-	            existingRecord.setName(pirulRecordDTO.getName());
-	        }
-	        if (pirulRecordDTO.getMobileNumber() != null) {
-	            existingRecord.setMobileNumber(pirulRecordDTO.getMobileNumber());
-	        }
-	        if (pirulRecordDTO.getLocation() != null) {
-	            existingRecord.setLocation(pirulRecordDTO.getLocation());
-	        }
-	        if (pirulRecordDTO.getAadharNumber() != null) {
-	            existingRecord.setAadharNumber(pirulRecordDTO.getAadharNumber());
-	        }
-	        if (pirulRecordDTO.getBankAccountNumber() != null) {
-	            existingRecord.setBankAccountNumber(pirulRecordDTO.getBankAccountNumber());
-	        }
-	        if (pirulRecordDTO.getBankName() != null) {
-	            existingRecord.setBankName(pirulRecordDTO.getBankName());
-	        }
-	        if (pirulRecordDTO.getIfscCode() != null) {
-	            existingRecord.setIfscCode(pirulRecordDTO.getIfscCode());
-	        }
-	        if (pirulRecordDTO.getWeightOfPirul() != Double.MIN_VALUE) {  // Use a default value for comparison
-	            existingRecord.setWeightOfPirul(pirulRecordDTO.getWeightOfPirul());
-	        }
-	        if (pirulRecordDTO.getRatePerKg() != Double.MIN_VALUE) {
-	            existingRecord.setRatePerKg(pirulRecordDTO.getRatePerKg());
-	        }
-	        if (pirulRecordDTO.getTotalAmount() != Double.MIN_VALUE) {
-	            existingRecord.setTotalAmount(pirulRecordDTO.getTotalAmount());
-	        }
-	        if (pirulRecordDTO.getCreatedBy() != null) {
-	            existingRecord.setCreatedBy(pirulRecordDTO.getCreatedBy());
-	        }
-	        existingRecord.setUpdatedBy(userId);
+		logger.info("Updating Pirul Record with ID: {}", id);
+		Optional<PirulRecord> checkRecord = pirulRepository.findById(id);
+		if (checkRecord.isPresent()) {
+			PirulRecord existingRecord = checkRecord.get();
 
-	        // Validate the updated entity
-	        Set<ConstraintViolation<PirulRecord>> violations = validator.validate(existingRecord);
-	        if (!violations.isEmpty()) {
-	            throw new ConstraintViolationException(violations);
-	        }
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			String userId = userDetails.getUsername();
 
-	        pirulRepository.save(existingRecord);
-	        logger.info("Pirul Record with ID {} updated successfully", id);
-	    } else {
-	        throw new IllegalArgumentException(ResponseMessage.RECORD_DOES_NOT_EXIST.getMessage());
-	    }
+			if (pirulRecordDTO.getName() != null) {
+				existingRecord.setName(pirulRecordDTO.getName());
+			}
+			if (pirulRecordDTO.getMobileNumber() != null) {
+				existingRecord.setMobileNumber(pirulRecordDTO.getMobileNumber());
+			}
+			if (pirulRecordDTO.getLocation() != null) {
+				existingRecord.setLocation(pirulRecordDTO.getLocation());
+			}
+			if (pirulRecordDTO.getAadharNumber() != null) {
+				existingRecord.setAadharNumber(pirulRecordDTO.getAadharNumber());
+			}
+			if (pirulRecordDTO.getBankAccountNumber() != null) {
+				existingRecord.setBankAccountNumber(pirulRecordDTO.getBankAccountNumber());
+			}
+			if (pirulRecordDTO.getBankName() != null) {
+				existingRecord.setBankName(pirulRecordDTO.getBankName());
+			}
+			if (pirulRecordDTO.getIfscCode() != null) {
+				existingRecord.setIfscCode(pirulRecordDTO.getIfscCode());
+			}
+			if (pirulRecordDTO.getWeightOfPirul() != Double.MIN_VALUE) { // Use a default value for comparison
+				existingRecord.setWeightOfPirul(pirulRecordDTO.getWeightOfPirul());
+			}
+			if (pirulRecordDTO.getRatePerKg() != Double.MIN_VALUE) {
+				existingRecord.setRatePerKg(pirulRecordDTO.getRatePerKg());
+			}
+			if (pirulRecordDTO.getTotalAmount() != Double.MIN_VALUE) {
+				existingRecord.setTotalAmount(pirulRecordDTO.getTotalAmount());
+			}
+			if (pirulRecordDTO.getCreatedBy() != null) {
+				existingRecord.setCreatedBy(pirulRecordDTO.getCreatedBy());
+			}
+			existingRecord.setUpdatedBy(userId);
+
+			// Validate the updated entity
+			Set<ConstraintViolation<PirulRecord>> violations = validator.validate(existingRecord);
+			if (!violations.isEmpty()) {
+				throw new ConstraintViolationException(violations);
+			}
+
+			pirulRepository.save(existingRecord);
+			logger.info("Pirul Record with ID {} updated successfully", id);
+		} else {
+			throw new IllegalArgumentException(ResponseMessage.RECORD_DOES_NOT_EXIST.getMessage());
+		}
 	}
 
 	@Override
@@ -191,7 +183,7 @@ public class RangerServiceImpl implements RangerService {
 
 	@Override
 	@Transactional(readOnly = true)
-	 public Page<PirulRecord> getApprovedPirulRecords(Pageable pageable) {
-        return pirulRepository.findByApprovedTrue(pageable);
-    }
+	public Page<PirulRecord> getApprovedPirulRecords(Pageable pageable) {
+		return pirulRepository.findByApprovedTrue(pageable);
+	}
 }
