@@ -1,6 +1,5 @@
 package com.pirul.springjwt.service;
 
-import com.pirul.springjwt.models.ERole;
 import com.pirul.springjwt.models.RangerUpdateRequest;
 import com.pirul.springjwt.models.Role;
 import com.pirul.springjwt.models.User;
@@ -32,7 +31,7 @@ public class UserServiceImpl implements UserService {
     public Page<User> getUsersWithRangerRole(Pageable pageable) {
         logger.info("Fetching users with ranger role - Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
 
-        Page<User> users = userRepository.findByRolesName(ERole.ROLE_RANGER, pageable);
+        Page<User> users = userRepository.findByRolesName(Role.ROLE_RANGER, pageable);
 
         logger.info("Fetched {} users with ranger role", users.getNumberOfElements());
         return users;
@@ -46,7 +45,7 @@ public class UserServiceImpl implements UserService {
             User user = optionalUser.get();
             Set<Role> roles = user.getRoles();
             for (Role role : roles) {
-                if (role.getName() == ERole.ROLE_RANGER) {
+                if (role == Role.ROLE_RANGER) {
                     userRepository.deleteById(id);
                     logger.info("Deleted Ranger with ID: {}", id);
                     return;
@@ -66,7 +65,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found with id " + id));
 
         // Check if the user has the role 'ROLE_ADMIN'
-        if (user.getRoles().stream().anyMatch(role -> role.getName() == ERole.ROLE_ADMIN)) {
+        if (user.getRoles().stream().anyMatch(role -> role == Role.ROLE_ADMIN)) {
             throw new IllegalArgumentException("Role of admin user cannot be updated");
         }
 

@@ -1,14 +1,12 @@
 package com.pirul.springjwt.controllers;
 
 import com.pirul.springjwt.constants.ResponseMessage;
-import com.pirul.springjwt.models.ERole;
 import com.pirul.springjwt.models.Role;
 import com.pirul.springjwt.models.User;
 import com.pirul.springjwt.payload.request.LoginRequest;
 import com.pirul.springjwt.payload.request.SignupRequest;
 import com.pirul.springjwt.payload.response.JwtResponse;
 import com.pirul.springjwt.payload.response.MessageResponse;
-import com.pirul.springjwt.repository.RoleRepository;
 import com.pirul.springjwt.repository.UserRepository;
 import com.pirul.springjwt.security.jwt.JwtUtils;
 import jakarta.validation.Valid;
@@ -44,9 +42,6 @@ public class AuthController {
     UserRepository userRepository;
 
     @Autowired
-    RoleRepository roleRepository;
-
-    @Autowired
     PasswordEncoder encoder;
 
     @Autowired
@@ -73,7 +68,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         logger.info("Received sign-up request for new user: {}", signUpRequest.getUsername());
-        if (!signUpRequest.getRole().equals(ERole.ROLE_RANGER.toString())) {
+        if (!signUpRequest.getRole().equals(Role.ROLE_RANGER.toString())) {
             logger.warn("Invalid sign-up role specified: {}", signUpRequest.getRole());
             return ResponseEntity.badRequest().body(new MessageResponse(ResponseMessage.INVALID_SIGNUP_ROLE));
         }
@@ -91,11 +86,27 @@ public class AuthController {
 
         Set<Role> roles = new HashSet<>();
 
-        Role rangerRole = roleRepository.findByName(ERole.ROLE_RANGER).orElseThrow(() -> new RuntimeException(ResponseMessage.ROLE_NOT_FOUND.getMessage()));
+        Role rangerRole = Role.ROLE_RANGER;
         roles.add(rangerRole);
 
         user.setRoles(roles);
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse(ResponseMessage.USER_REGISTERED_SUCCESSFULLY));
     }
+
+
+    @PostMapping("/admin/signup")
+    public ResponseEntity<?> adminRegisterUser() {
+        User user = new User("user", "user@gmail.com", encoder.encode("user@123"));
+
+        Set<Role> roles = new HashSet<>();
+
+        Role rangerRole = Role.ROLE_ADMIN;
+        roles.add(rangerRole);
+
+        user.setRoles(roles);
+        userRepository.save(user);
+        return ResponseEntity.ok(new MessageResponse(ResponseMessage.USER_REGISTERED_SUCCESSFULLY));
+    }
+
 }

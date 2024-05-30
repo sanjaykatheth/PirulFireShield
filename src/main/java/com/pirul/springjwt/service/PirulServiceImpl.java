@@ -2,9 +2,9 @@ package com.pirul.springjwt.service;
 
 import com.pirul.springjwt.constants.ResponseMessage;
 import com.pirul.springjwt.exception.ResourceNotFoundException;
-import com.pirul.springjwt.models.ERole;
 import com.pirul.springjwt.models.PirulRecord;
 import com.pirul.springjwt.models.PirulRecordDTO;
+import com.pirul.springjwt.models.Role;
 import com.pirul.springjwt.models.User;
 import com.pirul.springjwt.repository.PirulRepository;
 import com.pirul.springjwt.repository.UserRepository;
@@ -57,9 +57,9 @@ public class PirulServiceImpl implements PirulService {
         List<String> roles = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
         Page<PirulRecord> records;
-        if (roles.contains(ERole.ROLE_ADMIN.toString())) {
+        if (roles.contains(Role.ROLE_ADMIN.toString())) {
             records = pirulRepository.findAll(pageable);
-        } else if (roles.contains(ERole.ROLE_RANGER.toString())) {
+        } else if (roles.contains(Role.ROLE_RANGER.toString())) {
             records = pirulRepository.findByUser(user, pageable);
         } else {
             throw new ResourceNotFoundException("You do not have permission to access this resource");

@@ -1,6 +1,6 @@
 package com.pirul.springjwt.repository;
 
-import com.pirul.springjwt.models.ERole;
+import com.pirul.springjwt.models.Role;
 import com.pirul.springjwt.models.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Boolean existsByEmail(String email);
 
-    Page<User> findByRolesName(ERole role, Pageable pageable);
+    Page<User> findByRolesName(Role role, Pageable pageable);
 
 }
