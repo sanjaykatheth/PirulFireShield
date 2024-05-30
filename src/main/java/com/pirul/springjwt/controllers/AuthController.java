@@ -138,5 +138,22 @@ public class AuthController {
 		logger.info("New user registered successfully: {}", signUpRequest.getUsername());
 		return ResponseEntity.ok(new MessageResponse(ResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage()));
 	}
+	
+	@PostMapping("/admin/signup")
+	public ResponseEntity<?> adminRegisterUser() {
+		User user = new User("user", "user@gmail.com",
+				encoder.encode("user@123"));
+
+		Set<Role> roles = new HashSet<>();
+
+		Role rangerRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+				.orElseThrow(() -> new RuntimeException(ResponseMessage.ROLE_NOT_FOUND.getMessage()));
+		roles.add(rangerRole);
+
+		user.setRoles(roles);
+		userRepository.save(user);
+		return ResponseEntity.ok(new MessageResponse(ResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage()));
+	}
+	
 
 }
