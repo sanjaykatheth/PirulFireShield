@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,9 +31,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<User> getUsersWithRangerRole(Pageable pageable) {
         logger.info("Fetching users with ranger role - Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<User> users = userRepository.findByRolesName(Role.ROLE_RANGER, pageable);
-
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.ROLE_RANGER);
+        Page<User> users = userRepository.findByRolesIn(roles, pageable);
         logger.info("Fetched {} users with ranger role", users.getNumberOfElements());
         return users;
     }
