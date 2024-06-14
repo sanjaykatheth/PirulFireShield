@@ -6,6 +6,8 @@ import lombok.Getter;
 public enum ResponseMessage {
     EMAIL_ALREADY_IN_USE("Email is already in use!"),
     USERNAME_ALREADY_TAKEN("Username is already taken!"),
+    USERNAME_NOT_PERSENT("User is not available."),
+    
 
     ROLE_NOT_FOUND("Role is not found."),
     ADMIN_ROLE_NOT_ALLOWED("Admin role is not allowed for signup!"),
