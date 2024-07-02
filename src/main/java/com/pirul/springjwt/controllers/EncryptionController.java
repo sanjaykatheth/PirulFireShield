@@ -31,7 +31,7 @@ public class EncryptionController {
 
         try {
             SecretKeySpec skeySpec = new SecretKeySpec(MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8)), "AES");
-
+            System.out.println("Hi amit ");
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
             encryptedUsername = Base64.getEncoder().encodeToString(cipher.doFinal(encryptionRequest.getUsername().getBytes()));
